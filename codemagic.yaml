@@ -1,0 +1,18 @@
+# Compute Base on Codemagic (written by the app to a public repository it
+# keeps, compute-base-codemagic; see compute_base/codemagic.py).
+#
+# Nothing here is secret and nothing changes per desktop: each run gets a
+# one-time link (CB_BOOT) to its own setup at the app, which the job fetches
+# and deletes at once.
+workflows:
+  desktop:
+    name: Compute Base desktop
+    instance_type: mac_mini_m2
+    # The free plan's longest build; the desktop saves and stops well before it.
+    max_build_duration: 120
+    scripts:
+      - name: Start the desktop
+        script: |
+          curl --fail --silent --show-error --retry 5 --retry-all-errors --max-time 60 "$CB_BOOT" -o "$HOME/boot.sh"
+          curl --silent --max-time 30 --request DELETE "$CB_BOOT" || true
+          exec bash "$HOME/boot.sh"
